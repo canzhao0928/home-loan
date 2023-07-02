@@ -16,6 +16,9 @@ export default function PaymentTable({ tableData }) {
             <th scope="col" className="px-6 py-3">
               Remain loan
             </th>
+            <th scope="col" className="px-6 py-3">
+              Paied total interest
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -34,6 +37,7 @@ export default function PaymentTable({ tableData }) {
                 <td className="px-6 py-4">${table.interest}</td>
                 <td className="px-6 py-4">${table.Principal}</td>
                 <td className="px-6 py-4">${table.remainLoan}</td>
+                <td className="px-6 py-4">${table.totalInterest}</td>
               </tr>
             );
           })}

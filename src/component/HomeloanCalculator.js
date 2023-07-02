@@ -26,15 +26,18 @@ export default function HomeloanCalculator() {
     //calculate the payment table
     let loanBalanceRemain = loanBalance;
     let array = [];
+    let totalInterestTillNow = 0;
     for (let index = 1; index <= month; index++) {
       const interest = Math.round(loanBalanceRemain * monthlyRate);
       const Principal = Math.round(monthlyPay - interest);
       const remainLoan = Math.round(loanBalanceRemain - Principal);
+      totalInterestTillNow += interest;
       const tabledata = {
         month: index,
         interest: interest,
         Principal: Principal,
         remainLoan: remainLoan,
+        totalInterest: totalInterestTillNow,
       };
       array.push(tabledata);
       loanBalanceRemain = remainLoan;
@@ -46,10 +49,22 @@ export default function HomeloanCalculator() {
     setLoanBalance(e.target.value);
   };
   const handleYear = (e) => {
-    setYear(e.target.value);
+    if (e.target.value < 1) {
+      setYear(1);
+    } else if (e.target.value > 30) {
+      setYear(30);
+    } else {
+      setYear(e.target.value);
+    }
   };
   const handleInterestRate = (e) => {
-    setInterestRate(e.target.value);
+    if (e.target.value < 0) {
+      setInterestRate(0);
+    } else if (e.target.value > 100) {
+      setInterestRate(100);
+    } else {
+      setInterestRate(e.target.value);
+    }
   };
   return (
     <>
@@ -75,12 +90,12 @@ export default function HomeloanCalculator() {
             htmlFor="years"
             className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
           >
-            Years
+            Years(1-30)
           </label>
           <input
             onChange={handleYear}
             value={year}
-            type="text"
+            type="number"
             id="years"
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             required
@@ -96,7 +111,7 @@ export default function HomeloanCalculator() {
           <input
             onChange={handleInterestRate}
             value={interestRate}
-            type="text"
+            type="number"
             id="interest-rate"
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             required
