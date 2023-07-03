@@ -10,6 +10,7 @@ export default function HomeloanCalculator() {
   const [totalInterest, setTotalInterest] = useState("");
   const [tableArray, setTableArray] = useState([]);
   const [offsetBalance, setOffsetBalance] = useState(0);
+  const [monthOffset, setMonthOffset] = useState(0);
 
   const calculateTable = () => {
     let month = year * 12;
@@ -25,26 +26,21 @@ export default function HomeloanCalculator() {
     //calculate total interest
     const totalinterest = monthlyPay * (year * 12) - loanBalance;
     setTotalInterest(Math.round(totalinterest));
-
     //calculate the payment table
     let loanBalanceRemain = loanBalance;
     let array = [];
     let totalInterestTillNow = 0;
     for (let index = 1; loanBalanceRemain > 0; index++) {
       let remainLoan, principal;
+      const offset = offsetBalance + monthOffset * index;
       //offset < loanBalance
       let interest = 0;
       //offset < loanBalance
-      if (loanBalanceRemain - offsetBalance > 0) {
-        interest = Math.round(
-          (loanBalanceRemain - offsetBalance) * monthlyRate
-        );
+      if (loanBalanceRemain - offset > 0) {
+        interest = Math.round((loanBalanceRemain - offset) * monthlyRate);
       }
       // last month pay as plan no matter how much loan left
-      if (
-        loanBalanceRemain < monthlyPay &&
-        loanBalanceRemain - offsetBalance > 0
-      ) {
+      if (loanBalanceRemain < monthlyPay && loanBalanceRemain - offset > 0) {
         principal = loanBalanceRemain;
         interest = monthlyPay - principal;
         remainLoan = 0;
@@ -70,10 +66,10 @@ export default function HomeloanCalculator() {
 
   useEffect(() => {
     calculateTable();
-  }, [loanBalance, year, interestRate, offsetBalance]);
+  }, [loanBalance, year, interestRate, offsetBalance, monthOffset]);
 
   const handleLoanBalance = (e) => {
-    setLoanBalance(e.target.value);
+    setLoanBalance(+e.target.value);
   };
   const handleYear = (e) => {
     if (e.target.value < 1) {
@@ -81,7 +77,7 @@ export default function HomeloanCalculator() {
     } else if (e.target.value > 30) {
       setYear(30);
     } else {
-      setYear(e.target.value);
+      setYear(+e.target.value);
     }
   };
   const handleInterestRate = (e) => {
@@ -90,12 +86,16 @@ export default function HomeloanCalculator() {
     } else if (e.target.value > 100) {
       setInterestRate(100);
     } else {
-      setInterestRate(e.target.value);
+      setInterestRate(+e.target.value);
     }
   };
 
   const handleOffsetBalance = (e) => {
-    setOffsetBalance(e.target.value);
+    setOffsetBalance(+e.target.value);
+  };
+
+  const handleMonthlyOffset = (e) => {
+    setMonthOffset(+e.target.value);
   };
   return (
     <>
@@ -160,6 +160,22 @@ export default function HomeloanCalculator() {
             value={offsetBalance}
             type="number"
             id="offset-balance"
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            required
+          />
+        </div>
+        <div>
+          <label
+            htmlFor="month-offset"
+            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+          >
+            Monthly offset deposits
+          </label>
+          <input
+            onChange={handleMonthlyOffset}
+            value={monthOffset}
+            type="number"
+            id="month-offset"
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             required
           />
