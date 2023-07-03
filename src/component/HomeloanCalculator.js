@@ -15,11 +15,12 @@ export default function HomeloanCalculator() {
     let month = year * 12;
     const monthlyRate = interestRate / 1200;
     //calculate monthly payment
-    const monthlyPay =
+    const monthlyPay = Math.round(
       (loanBalance * (monthlyRate * Math.pow(1 + monthlyRate, month))) /
-      (Math.pow(1 + monthlyRate, month) - 1);
+        (Math.pow(1 + monthlyRate, month) - 1)
+    );
 
-    setMonthPay(Math.round(monthlyPay));
+    setMonthPay(monthlyPay);
 
     //calculate total interest
     const totalinterest = monthlyPay * (year * 12) - loanBalance;
@@ -39,8 +40,13 @@ export default function HomeloanCalculator() {
           (loanBalanceRemain - offsetBalance) * monthlyRate
         );
       }
-      if (loanBalanceRemain < monthlyPay) {
+      // last month pay as plan no matter how much loan left
+      if (
+        loanBalanceRemain < monthlyPay &&
+        loanBalanceRemain - offsetBalance > 0
+      ) {
         principal = loanBalanceRemain;
+        interest = monthlyPay - principal;
         remainLoan = 0;
       } else {
         principal = Math.round(monthlyPay - interest);
