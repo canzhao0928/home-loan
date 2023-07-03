@@ -29,13 +29,12 @@ export default function HomeloanCalculator() {
     let loanBalanceRemain = loanBalance;
     let array = [];
     let totalInterestTillNow = 0;
-    const interestLoan = loanBalanceRemain - offsetBalance;
     for (let index = 1; loanBalanceRemain > 0; index++) {
       let remainLoan, principal;
       //offset < loanBalance
       let interest = 0;
       //offset < loanBalance
-      if (interestLoan > 0) {
+      if (loanBalanceRemain - offsetBalance > 0) {
         interest = Math.round(
           (loanBalanceRemain - offsetBalance) * monthlyRate
         );
@@ -43,7 +42,6 @@ export default function HomeloanCalculator() {
       if (loanBalanceRemain < monthlyPay) {
         principal = loanBalanceRemain;
         remainLoan = 0;
-        console.log(remainLoan);
       } else {
         principal = Math.round(monthlyPay - interest);
         remainLoan = Math.round(loanBalanceRemain - principal);
@@ -62,7 +60,6 @@ export default function HomeloanCalculator() {
       array.push(tabledata);
     }
     setTableArray(array);
-    console.log("before render");
   };
 
   useEffect(() => {
