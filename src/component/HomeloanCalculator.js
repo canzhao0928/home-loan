@@ -9,8 +9,9 @@ export default function HomeloanCalculator() {
   const [monthPay, setMonthPay] = useState("");
   const [totalInterest, setTotalInterest] = useState("");
   const [tableArray, setTableArray] = useState([]);
+  const [offsetBalance, setOffsetBalance] = useState(0);
 
-  useEffect(() => {
+  const calculateTable = () => {
     let month = year * 12;
     const monthlyRate = interestRate / 1200;
     //calculate monthly payment
@@ -19,31 +20,54 @@ export default function HomeloanCalculator() {
       (Math.pow(1 + monthlyRate, month) - 1);
 
     setMonthPay(Math.round(monthlyPay));
+
     //calculate total interest
-    const totalinterest = monthlyPay * year * 12 - loanBalance;
+    const totalinterest = monthlyPay * (year * 12) - loanBalance;
     setTotalInterest(Math.round(totalinterest));
 
     //calculate the payment table
     let loanBalanceRemain = loanBalance;
     let array = [];
     let totalInterestTillNow = 0;
-    for (let index = 1; index <= month; index++) {
-      const interest = Math.round(loanBalanceRemain * monthlyRate);
-      const Principal = Math.round(monthlyPay - interest);
-      const remainLoan = Math.round(loanBalanceRemain - Principal);
+    const interestLoan = loanBalanceRemain - offsetBalance;
+    for (let index = 1; loanBalanceRemain > 0; index++) {
+      let remainLoan, principal;
+      //offset < loanBalance
+      let interest = 0;
+      //offset < loanBalance
+      if (interestLoan > 0) {
+        interest = Math.round(
+          (loanBalanceRemain - offsetBalance) * monthlyRate
+        );
+      }
+      if (loanBalanceRemain < monthlyPay) {
+        principal = loanBalanceRemain;
+        remainLoan = 0;
+        console.log(remainLoan);
+      } else {
+        principal = Math.round(monthlyPay - interest);
+        remainLoan = Math.round(loanBalanceRemain - principal);
+      }
+      loanBalanceRemain = remainLoan;
+
       totalInterestTillNow += interest;
+
       const tabledata = {
         month: index,
         interest: interest,
-        Principal: Principal,
+        Principal: principal,
         remainLoan: remainLoan,
         totalInterest: totalInterestTillNow,
       };
       array.push(tabledata);
-      loanBalanceRemain = remainLoan;
     }
     setTableArray(array);
-  }, [loanBalance, year, interestRate]);
+    console.log("before render");
+  };
+
+  useEffect(() => {
+    calculateTable();
+  }, [loanBalance, year, interestRate, offsetBalance]);
 
   const handleLoanBalance = (e) => {
     setLoanBalance(e.target.value);
@@ -65,6 +89,10 @@ export default function HomeloanCalculator() {
     } else {
       setInterestRate(e.target.value);
     }
+  };
+
+  const handleOffsetBalance = (e) => {
+    setOffsetBalance(e.target.value);
   };
   return (
     <>
@@ -118,6 +146,22 @@ export default function HomeloanCalculator() {
           />
         </div>
         <div>
+          <label
+            htmlFor="offset-balance"
+            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+          >
+            Inital offset balance
+          </label>
+          <input
+            onChange={handleOffsetBalance}
+            value={offsetBalance}
+            type="number"
+            id="offset-balance"
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            required
+          />
+        </div>
+        <div>
           <h2>
             Estinmated repayment:
             <strong className="font-extrabold text-gray-900 dark:text-white text-3xl">
@@ -130,7 +174,30 @@ export default function HomeloanCalculator() {
           <h2>
             Total interest:
             <strong className="font-extrabold text-gray-900 dark:text-white text-3xl">
-              {totalInterest}
+              {tableArray.length === 0
+                ? totalInterest
+                : tableArray[tableArray.length - 1].totalInterest}
+            </strong>
+          </h2>
+        </div>
+        <div>
+          <h2>
+            Your loan term(Months):
+            <strong className="font-extrabold text-gray-900 dark:text-white text-3xl">
+              {tableArray.length === 0
+                ? year * 12
+                : tableArray[tableArray.length - 1].month}
+            </strong>
+          </h2>
+        </div>
+        <div>
+          <h2>
+            Saved interest:
+            <strong className="font-extrabold text-gray-900 dark:text-white text-3xl">
+              {tableArray.length === 0
+                ? 0
+                : totalInterest -
+                  tableArray[tableArray.length - 1].totalInterest}
             </strong>
           </h2>
         </div>
