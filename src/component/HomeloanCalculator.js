@@ -4,7 +4,7 @@ import PaymentTable from "./PaymentTable";
 
 export default function HomeloanCalculator() {
   const [loanBalance, setLoanBalance] = useState(720000);
-  const [year, setYear] = useState(30);
+  const [year, setYear] = useState(1);
   const [interestRate, setInterestRate] = useState(6.0);
   const [monthPay, setMonthPay] = useState("");
   const [totalInterest, setTotalInterest] = useState("");
@@ -12,20 +12,12 @@ export default function HomeloanCalculator() {
   const [offsetBalance, setOffsetBalance] = useState(0);
   const [monthOffset, setMonthOffset] = useState(0);
 
-  const calculateTable = () => {
-    let month = year * 12;
-    const monthlyRate = interestRate / 1200;
-    //calculate monthly payment
-    const monthlyPay = Math.round(
-      (loanBalance * (monthlyRate * Math.pow(1 + monthlyRate, month))) /
-        (Math.pow(1 + monthlyRate, month) - 1)
-    );
-
-    setMonthPay(monthlyPay);
-
-    //calculate total interest
-    const totalinterest = monthlyPay * (year * 12) - loanBalance;
-    setTotalInterest(Math.round(totalinterest));
+  const calculateRepaymentTable = (
+    monthlyRate,
+    monthlyPay,
+    monthOffset,
+    offsetBalance
+  ) => {
     //calculate the payment table
     let loanBalanceRemain = loanBalance;
     let array = [];
@@ -37,7 +29,7 @@ export default function HomeloanCalculator() {
       let interest = 0;
       //offset < loanBalance
       if (loanBalanceRemain - offset > 0) {
-        interest = Math.round((loanBalanceRemain - offset) * monthlyRate);
+        interest = (loanBalanceRemain - offset) * monthlyRate;
       }
       // last month pay as plan no matter how much loan left
       if (loanBalanceRemain < monthlyPay && loanBalanceRemain - offset > 0) {
@@ -45,12 +37,25 @@ export default function HomeloanCalculator() {
         interest = monthlyPay - principal;
         remainLoan = 0;
       } else {
-        principal = Math.round(monthlyPay - interest);
-        remainLoan = Math.round(loanBalanceRemain - principal);
+        principal = monthlyPay - interest;
+        remainLoan = loanBalanceRemain - principal;
       }
       loanBalanceRemain = remainLoan;
 
       totalInterestTillNow += interest;
+
+      let compInterestRate = 0;
+      if (index % 12 === 0) {
+        compInterestRate = (
+          (Math.pow(
+            (loanBalance - offset + totalInterestTillNow) /
+              (loanBalance - offset),
+            1 / (index / 12)
+          ) -
+            1) *
+          100
+        ).toFixed(2);
+      }
 
       const tabledata = {
         month: index,
@@ -58,14 +63,50 @@ export default function HomeloanCalculator() {
         Principal: principal,
         remainLoan: remainLoan,
         totalInterest: totalInterestTillNow,
+        compInterestRate: compInterestRate,
       };
       array.push(tabledata);
     }
-    setTableArray(array);
-  };
 
+    return array;
+  };
   useEffect(() => {
-    calculateTable();
+    let month = year * 12;
+    const monthlyRate = interestRate / 1200;
+    //calculate monthly payment
+    const monthlyPay =
+      (loanBalance * (monthlyRate * Math.pow(1 + monthlyRate, month))) /
+      (Math.pow(1 + monthlyRate, month) - 1);
+    setMonthPay(monthlyPay);
+
+    //calculate total interest
+    const totalinterest = monthlyPay * (year * 12) - loanBalance;
+    setTotalInterest(totalinterest);
+
+    //calculate table data
+    let array = calculateRepaymentTable(
+      monthlyRate,
+      monthlyPay,
+      monthOffset,
+      offsetBalance
+    );
+    if (monthOffset || offsetBalance) {
+      //without offset
+      const arrayWithoutOffset = calculateRepaymentTable(
+        monthlyRate,
+        monthlyPay,
+        0,
+        0
+      );
+
+      const offsetArray = array.map((data, index) => {
+        data.savedInterest =
+          arrayWithoutOffset[index].totalInterest - data.totalInterest;
+        return data;
+      });
+      array = offsetArray;
+    }
+    setTableArray(array);
   }, [loanBalance, year, interestRate, offsetBalance, monthOffset]);
 
   const handleLoanBalance = (e) => {
@@ -184,7 +225,7 @@ export default function HomeloanCalculator() {
           <h2>
             Estinmated repayment:
             <strong className="font-extrabold text-gray-900 dark:text-white text-3xl">
-              {monthPay}
+              {Math.ceil(monthPay)}
             </strong>
             /month
           </h2>
@@ -194,8 +235,8 @@ export default function HomeloanCalculator() {
             Total interest:
             <strong className="font-extrabold text-gray-900 dark:text-white text-3xl">
               {tableArray.length === 0
-                ? totalInterest
-                : tableArray[tableArray.length - 1].totalInterest}
+                ? Math.ceil(totalInterest)
+                : Math.ceil(tableArray[tableArray.length - 1].totalInterest)}
             </strong>
           </h2>
         </div>
@@ -215,8 +256,10 @@ export default function HomeloanCalculator() {
             <strong className="font-extrabold text-gray-900 dark:text-white text-3xl">
               {tableArray.length === 0
                 ? 0
-                : totalInterest -
-                  tableArray[tableArray.length - 1].totalInterest}
+                : Math.round(
+                    totalInterest -
+                      tableArray[tableArray.length - 1].totalInterest
+                  )}
             </strong>
           </h2>
         </div>
