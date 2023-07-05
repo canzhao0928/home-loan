@@ -4,7 +4,7 @@ import PaymentTable from "./PaymentTable";
 
 export default function HomeloanCalculator() {
   const [loanBalance, setLoanBalance] = useState(720000);
-  const [year, setYear] = useState(1);
+  const [year, setYear] = useState(30);
   const [interestRate, setInterestRate] = useState(6.0);
   const [monthPay, setMonthPay] = useState("");
   const [totalInterest, setTotalInterest] = useState("");
@@ -140,7 +140,7 @@ export default function HomeloanCalculator() {
   };
   return (
     <>
-      <div className="container mx-auto grid gap-6 my-6 md:grid-cols-3">
+      <div className="container mx-auto p-5 rounded-sm grid gap-6 my-6 md:grid-cols-3 ring-2 ring-grey-500 ring-offset-4 ring-offset-slate-50 dark:ring-offset-slate-900  ">
         <div>
           <label
             htmlFor="loan-balance"

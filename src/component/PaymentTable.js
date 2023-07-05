@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react";
+import Pagination from "./Pagination";
 
 export default function PaymentTable({ tableData }) {
+  let PageSize = 10;
+
   const [number, setNumber] = useState("yearly");
   const [tableDisplay, setTableDisplay] = useState(tableData);
+  const [currenPage, setCurrentPage] = useState(1);
 
   const handleNumber = (e) => {
     setNumber(e.target.value);
@@ -91,6 +95,13 @@ export default function PaymentTable({ tableData }) {
           })}
         </tbody>
       </table>
+      <Pagination
+        // className="pagination-bar"
+        currentPage={currenPage}
+        totalCount={tableDisplay.length}
+        pageSize={PageSize}
+        handlePagechange={(page) => setCurrentPage(page)}
+      />
     </div>
   );
 }
