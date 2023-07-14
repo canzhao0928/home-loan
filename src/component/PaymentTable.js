@@ -2,24 +2,31 @@ import { useEffect, useState } from "react";
 import Pagination from "./Pagination";
 
 export default function PaymentTable({ tableData }) {
-  let PageSize = 10;
+  const pageSize = 10;
 
   const [number, setNumber] = useState("yearly");
   const [tableDisplay, setTableDisplay] = useState(tableData);
-  const [currenPage, setCurrentPage] = useState(1);
+  const [tableAll, setTableAll] = useState(tableData);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const handleNumber = (e) => {
     setNumber(e.target.value);
   };
 
   useEffect(() => {
+    let data = [];
     if (number === "monthly") {
-      setTableDisplay(tableData);
+      data = tableData;
     } else if (number === "yearly") {
-      const array = tableData.filter((table) => table.month % 12 === 0);
-      setTableDisplay(array);
+      data = tableData.filter((table) => table.month % 12 === 0);
     }
-  }, [number, tableData]);
+    setTableAll(data);
+    const displayData = data.filter(
+      (table, index) =>
+        index >= (currentPage - 1) * pageSize && index < currentPage * pageSize
+    );
+    setTableDisplay(displayData);
+  }, [number, tableData, currentPage]);
 
   return (
     <div className="container m-auto">
@@ -97,9 +104,9 @@ export default function PaymentTable({ tableData }) {
       </table>
       <Pagination
         // className="pagination-bar"
-        currentPage={currenPage}
-        totalCount={tableDisplay.length}
-        pageSize={PageSize}
+        currentPage={currentPage}
+        totalCount={tableAll.length}
+        pageSize={pageSize}
         handlePagechange={(page) => setCurrentPage(page)}
       />
     </div>
