@@ -11,6 +11,8 @@ export default function HomeloanCalculator() {
   const [tableArray, setTableArray] = useState([]);
   const [offsetBalance, setOffsetBalance] = useState(0);
   const [monthOffset, setMonthOffset] = useState(0);
+  const [yearErrorMsg, setYearErrorMsg] = useState("");
+  const [interestErrorMsg, setInterestErrorMsg] = useState("");
 
   const calculateRepaymentTable = (
     monthlyRate,
@@ -71,6 +73,9 @@ export default function HomeloanCalculator() {
     return array;
   };
   useEffect(() => {
+    if (interestRate <= 0 || year < 1 || year > 30) {
+      return;
+    }
     let month = year * 12;
     const monthlyRate = interestRate / 1200;
     //calculate monthly payment
@@ -113,21 +118,23 @@ export default function HomeloanCalculator() {
     setLoanBalance(+e.target.value);
   };
   const handleYear = (e) => {
-    if (e.target.value < 1) {
-      setYear(1);
-    } else if (e.target.value > 30) {
-      setYear(30);
+    setYear(+e.target.value);
+    if (e.target.value < 1 || e.target.value > 30) {
+      setYearErrorMsg("Loan year should be 1-30");
     } else {
-      setYear(+e.target.value);
+      if (yearErrorMsg !== "") {
+        setYearErrorMsg("");
+      }
     }
   };
   const handleInterestRate = (e) => {
-    if (e.target.value < 0) {
-      setInterestRate(0);
-    } else if (e.target.value > 100) {
-      setInterestRate(100);
+    setInterestRate(+e.target.value);
+    if (e.target.value <= 0) {
+      setInterestErrorMsg("Loan interest rate should be greater than 0");
     } else {
-      setInterestRate(+e.target.value);
+      if (interestErrorMsg !== "") {
+        setInterestErrorMsg("");
+      }
     }
   };
 
@@ -163,6 +170,15 @@ export default function HomeloanCalculator() {
             className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
           >
             Years(1-30)
+            {yearErrorMsg && (
+              <div
+                className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+                role="alert"
+              >
+                <strong className="font-bold">Error: </strong>
+                <span className="block sm:inline">{yearErrorMsg}</span>
+              </div>
+            )}
           </label>
           <input
             onChange={handleYear}
@@ -179,6 +195,15 @@ export default function HomeloanCalculator() {
             className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
           >
             Interest rate(%)
+            {interestErrorMsg && (
+              <div
+                className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+                role="alert"
+              >
+                <strong className="font-bold">Error: </strong>
+                <span className="block sm:inline">{interestErrorMsg}</span>
+              </div>
+            )}
           </label>
           <input
             onChange={handleInterestRate}
