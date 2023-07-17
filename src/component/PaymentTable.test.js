@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import PaymentTable from "./PaymentTable";
 
 const generalMockData = () => {
@@ -23,7 +23,7 @@ test("Default render yearly data", () => {
   const mockData = generalMockData();
   render(<PaymentTable tableData={mockData} />);
 
-  const year = screen.getByTestId("year");
+  const year = screen.getByTestId("date");
   expect(year).toBeInTheDocument();
 
   const interest = screen.getByText("$111");
@@ -40,4 +40,34 @@ test("Default render yearly data", () => {
 
   const compInterestRate = screen.getByText("5%");
   expect(compInterestRate).toBeInTheDocument();
+});
+
+test("choose monthly to show months data", () => {
+  const mockData = generalMockData();
+  render(<PaymentTable tableData={mockData} />);
+
+  const select = screen.getByTestId("select");
+  fireEvent.change(select, { target: { value: "monthly" } });
+
+  const month = screen.getByText("10");
+  expect(month).toBeInTheDocument();
+
+  const monthnotExist = screen.queryByText("11");
+  expect(monthnotExist).not.toBeInTheDocument();
+
+  const compInterestRate = screen.queryByText("5%");
+  expect(compInterestRate).not.toBeInTheDocument();
+});
+
+test("set currentPage to 2, display from the 11th month", () => {
+  const mockData = generalMockData();
+  render(<PaymentTable tableData={mockData} />);
+  const select = screen.getByTestId("select");
+  fireEvent.change(select, { target: { value: "monthly" } });
+
+  const next = screen.getByText("Next");
+  fireEvent.click(next);
+
+  const month = screen.getByText("11");
+  expect(month).toBeInTheDocument();
 });
