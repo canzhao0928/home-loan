@@ -175,7 +175,9 @@ export default function HomeloanCalculator() {
                 className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
                 role="alert"
               >
-                <strong className="font-bold">Error: </strong>
+                <strong className="font-bold" data-testid="errorMsg">
+                  Error:{" "}
+                </strong>
                 <span className="block sm:inline">{yearErrorMsg}</span>
               </div>
             )}
@@ -200,7 +202,9 @@ export default function HomeloanCalculator() {
                 className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
                 role="alert"
               >
-                <strong className="font-bold">Error: </strong>
+                <strong className="font-bold" data-testid="errorMsg-IR">
+                  Error:{" "}
+                </strong>
                 <span className="block sm:inline">{interestErrorMsg}</span>
               </div>
             )}
@@ -224,7 +228,7 @@ export default function HomeloanCalculator() {
           <input
             onChange={handleOffsetBalance}
             value={offsetBalance}
-            type="number"
+            type="text"
             id="offset-balance"
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             required
@@ -240,7 +244,7 @@ export default function HomeloanCalculator() {
           <input
             onChange={handleMonthlyOffset}
             value={monthOffset}
-            type="number"
+            type="text"
             id="month-offset"
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             required
